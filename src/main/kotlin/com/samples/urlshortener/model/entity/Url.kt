@@ -15,9 +15,11 @@ data class Url(
     @Column(name = "original_url", nullable = false)
     val originalUrl: String,
 
+    //in case if we need to have expiration for links
     @Column(name = "created_at", nullable = false)
     val createdAt: LocalDateTime = LocalDateTime.now()
 
+//   in case if we want to know which user created this url
 //    @Column(nullable=false)
 //    val User user;
 )

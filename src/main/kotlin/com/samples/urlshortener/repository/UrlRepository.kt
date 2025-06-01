@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface UrlRepository: JpaRepository<Url, String>{
     fun findByShortUrl(shortUrl: String): Url?
+    fun findByOriginalUrl(originalUrl: String): Url?
 }
