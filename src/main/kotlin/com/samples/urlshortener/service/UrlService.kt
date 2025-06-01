@@ -1,5 +1,6 @@
 package com.samples.urlshortener.service
 
+import com.samples.urlshortener.config.UrlShortenerProperties
 import com.samples.urlshortener.model.entity.Url
 import com.samples.urlshortener.repository.UrlRepository
 import org.slf4j.Logger
@@ -10,7 +11,7 @@ import java.util.Base64
 
 
 @Service
-class UrlService(private val urlRepository : UrlRepository) {
+class UrlService(private val urlRepository : UrlRepository,private val urlShortenerProperties : UrlShortenerProperties) {
     private val logger: Logger = LoggerFactory.getLogger(UrlService::class.java)
 
     /**
@@ -58,10 +59,10 @@ class UrlService(private val urlRepository : UrlRepository) {
     * */
     private fun generateShortUrl(originalUrl: String):String {
         try {
-            val digest = MessageDigest.getInstance("SHA-256")
+            val digest = MessageDigest.getInstance(urlShortenerProperties.hashAlgorithm)
             val hashBytes = digest.digest(originalUrl.toByteArray(Charsets.UTF_8))
             val base64Hash = Base64.getUrlEncoder().withoutPadding().encodeToString(hashBytes)
-            return base64Hash.take(8)
+            return base64Hash.take(urlShortenerProperties.slugLength)
         }catch (e:Exception){
             logger.error("there is a problem while generating shortUrl {}", e.message)
             throw Exception("There is a problem while generating shortUrl")
