@@ -10,10 +10,10 @@ import java.time.LocalDateTime
 data class Url(
     @Id
     @Column(name = "short_url", nullable = false, unique = true)
-    val shortUrl: String,
+    val shortUrl : String = "",
 
     @Column(name = "original_url", nullable = false)
-    val originalUrl: String,
+    val originalUrl: String = "",
 
     //in case if we need to have expiration for links
     @Column(name = "created_at", nullable = false)

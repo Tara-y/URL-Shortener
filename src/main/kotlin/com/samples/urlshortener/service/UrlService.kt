@@ -12,7 +12,7 @@ import java.util.Base64
 
 @Service
 class UrlService(private val urlRepository : UrlRepository,private val urlShortenerProperties : UrlShortenerProperties) {
-    private val logger: Logger = LoggerFactory.getLogger(UrlService::class.java)
+    private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
     /**
      * create a short url and save it
@@ -51,7 +51,7 @@ class UrlService(private val urlRepository : UrlRepository,private val urlShorte
     /*
     * Resolve the url*/
     fun resolveUrl(shortUrl:String):String{
-        return urlRepository.findByShortUrl(shortUrl)?.originalUrl?: "URL Not Found!"
+        return urlRepository.findByShortUrl(shortUrl)?.originalUrl?: ""
     }
 
     /*
