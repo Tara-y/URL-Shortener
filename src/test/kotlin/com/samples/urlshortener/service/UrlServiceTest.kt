@@ -1,6 +1,8 @@
 package com.samples.urlshortener.service
 
 import com.samples.urlshortener.config.UrlShortenerProperties
+import com.samples.urlshortener.exception.ResourceNotFoundException
+import com.samples.urlshortener.exception.UrlValidationException
 import com.samples.urlshortener.model.entity.Url
 import com.samples.urlshortener.repository.UrlRepository
 import io.mockk.every
@@ -9,6 +11,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDateTime
@@ -25,6 +28,7 @@ class UrlServiceTest {
     fun setUp() {
         every { urlShortenerProperties.hashAlgorithm } returns "SHA-256"
         every { urlShortenerProperties.slugLength } returns 8
+        every { urlShortenerProperties.maxRetries } returns 2
         urlService = UrlService(urlRepository, urlShortenerProperties)
     }
 
@@ -40,7 +44,7 @@ class UrlServiceTest {
 
         every { urlRepository.findByOriginalUrl(originalUrl) } returns null
         every { urlRepository.existsById(generatedShortUrl) } returns false
-        every { urlRepository.save(any()) } returns savedUrl
+        every { urlRepository.save(any<Url>()) } returns savedUrl
 
         val result = urlService.shortenUrl(originalUrl)
 
@@ -50,7 +54,7 @@ class UrlServiceTest {
 
     @Test
     fun `should resolve short URL`() {
-        val shortUrl = "abc123"
+        val shortUrl = "abc12345"
         val originalUrl = "https://example.com"
         val url = Url(shortUrl = shortUrl, originalUrl = originalUrl, createdAt = LocalDateTime.now())
 
@@ -63,13 +67,39 @@ class UrlServiceTest {
     }
 
     @Test
+    fun `should return existing short URL if original URL already exists`() {
+        val originalUrl = "https://example.com"
+        val shortUrl = "abc12345"
+        val existingUrl = Url(shortUrl = shortUrl, originalUrl = originalUrl, createdAt = LocalDateTime.now())
+
+        every { urlRepository.findByOriginalUrl(originalUrl) } returns existingUrl
+
+        val result = urlService.shortenUrl(originalUrl)
+
+        assertEquals(shortUrl, result)
+    }
+
+    @Test
+    fun `should throw UrlValidationException for invalid URL`() {
+        val invalidUrl = "invalid-url"
+
+        assertThrows<UrlValidationException> {
+            urlService.shortenUrl(invalidUrl)
+        }.also {
+            assertEquals("Invalid URL: $invalidUrl", it.message)
+        }
+    }
+
+    @Test
     fun `should return empty string for non-existent short URL`() {
-        val shortUrl = "5558785"
+        val shortUrl = "noneExistent"
 
         every { urlRepository.findByShortUrl(shortUrl) } returns null
 
-        val result = urlService.resolveUrl(shortUrl)
-
-        assertEquals("", result)
+        assertThrows<ResourceNotFoundException> {
+            urlService.resolveUrl(shortUrl)
+        }.also {
+            assertEquals("Short URL not found: $shortUrl", it.message)
+        }
     }
 }
