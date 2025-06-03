@@ -8,4 +8,5 @@ import org.springframework.stereotype.Component
 class UrlShortenerProperties {
     var slugLength : Int = 8
     var hashAlgorithm : String = "SHA-256"
+    var maxRetries :Int = 3
 }
