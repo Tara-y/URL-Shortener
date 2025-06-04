@@ -21,11 +21,9 @@ class UrlController(private val urlService: UrlService) {
     @GetMapping("/resolve/{shortUrl}")
     fun resolveUrl(@PathVariable shortUrl:String):ResponseEntity<String>{
         val originalUrl = urlService.resolveUrl(shortUrl)
-        val location: URI = URI.create(originalUrl)
         return ResponseEntity
                 .status(HttpStatus.FOUND)
-                .location(location)
-                .build()
+                .body(originalUrl)
     }
 
 }
