@@ -43,8 +43,12 @@ class UrlService(private val urlRepository : UrlRepository,private val urlShorte
     * Resolve the url
     * */
     fun resolveUrl(shortUrl:String):String{
-        return urlRepository.findByShortUrl(shortUrl)?.originalUrl?:
+        val url = urlRepository.findByShortUrl(shortUrl)
+        if(url == null)
             throw ResourceNotFoundException("Short URL not found: $shortUrl")
+        logger.info("Resolving URL: {}", url.originalUrl)
+        return url.originalUrl
+
     }
 
     /*
