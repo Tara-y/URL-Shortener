@@ -91,7 +91,7 @@ class UrlServiceTest {
     }
 
     @Test
-    fun `should return empty string for non-existent short URL`() {
+    fun `should throw ResourceNotFoundException for non-existent short URL`() {
         val shortUrl = "noneExistent"
 
         every { urlRepository.findByShortUrl(shortUrl) } returns null
